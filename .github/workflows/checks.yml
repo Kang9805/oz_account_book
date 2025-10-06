@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      # 서비스 이름은 'postgres'입니다.
+      # 서비스 이름은 'postgres'이며, 호스트도 'postgres'를 사용합니다.
       postgres:
         image: postgres:15-alpine
         env:
@@ -21,13 +21,12 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
           POSTGRES_DB: ${{ secrets.DB_NAME }}
         ports:
-          # 포트 매핑은 유지
           - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 5 # DB 준비에 충분한 시간을 줍니다.
 
     steps:
     - name: Checkout code
@@ -38,23 +37,25 @@ jobs:
       with:
         python-version: '3.12'
 
-    # 1. uv 설치
     - name: Install uv
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
         echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
-    # 2. 의존성 설치 및 가상 환경 경로 PATH 추가
     - name: Install Dependencies and Activate Venv
       run: |
         uv sync 
         echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
+    # ❌ 이전에 YAML 오류를 유발했던 'Debug DB URL' 스텝을 완전히 제거했습니다.
+
     # 3. Django 마이그레이션 및 테스트 실행
     - name: Run Django Migration & Tests
       env:
-        # ✅ 호스트 이름을 서비스 이름 'postgres'로 수정했습니다.
+        # 호스트 이름은 'postgres'를 유지
         DATABASE_URL: postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@postgres:5432/${{ secrets.DB_NAME }}
       run: |
+        # ✅ DB 서비스가 완전히 준비될 때까지 10초 대기
+        sleep 10
         python manage.py migrate --no-input
         python manage.py test
