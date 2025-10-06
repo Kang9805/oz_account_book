@@ -36,21 +36,18 @@ jobs:
       with:
         python-version: '3.12'
 
-    # 1. uv 설치 및 PATH 설정
     - name: Install uv
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
-        echo "$HOME/.cargo/bin" >> $GITHUB_PATH # uv 명령어 찾기
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
-    # 2. 의존성 설치 및 환경 활성화 (핵심 수정)
     - name: Install Dependencies and Activate Venv
       run: |
-        uv sync
-        # uv가 만든 가상환경(.venv)의 bin 폴더를 PATH에 추가하여 
-        # ruff 모듈을 찾을 수 있게 만듭니다.
+        # ✅ --with-dev 옵션으로 ruff를 포함한 개발 의존성 설치 보장!
+        uv sync --with-dev
+        # ruff가 설치된 가상환경 경로를 PATH에 추가
         echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
-    # 3. ruff 실행 (python -m 사용)
     - name: Run Ruff (Linting & Formatting Check)
       run: python -m ruff check .
 
