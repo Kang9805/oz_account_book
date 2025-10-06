@@ -35,22 +35,18 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-        cache: 'pip'
+        cache: 'pip' # pip 캐시 사용
 
-    # 1. uv 설치
-    - name: Install uv
-      run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        echo "$HOME/.cargo/bin" >> $GITHUB_PATH # uv 실행 파일만 PATH에 추가
-
-    # 2. uv를 사용해 의존성 설치 (ruff 포함)
+    # 1. 의존성 설치 (requirements.txt 사용)
     - name: Install Dependencies
-      run: uv sync
+      # pip install로 모든 패키지 설치
+      run: pip install -r requirements.txt
 
-    # 3. ruff 실행은 python -m 사용 (No module named ruff 오류 해결)
+    # 2. ruff 실행
     - name: Run Ruff (Linting & Formatting Check)
       run: python -m ruff check .
 
+    # 3. 테스트 실행
     - name: Run Django Migration & Tests
       env:
         DATABASE_URL: postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}
