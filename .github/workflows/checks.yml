@@ -10,9 +10,8 @@ on:
 
 jobs:
   ci:
-    runs-on: ubuntu-latest # GitHub Actions 환경
+    runs-on: ubuntu-latest
 
-    # PostgreSQL 서비스 정의
     services:
       postgres:
         image: postgres:15-alpine
@@ -21,9 +20,44 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
           POSTGRES_DB: ${{ secrets.DB_NAME }}
         ports:
-          - 5432:5432 # localhost:5432로 연결
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
-          --health-retries
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+
+    - name: Install uv and Set PATH
+      run: |
+        # uv 설치
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        
+        # PATH 설정: uv 실행 경로와 가상 환경 바이너리 경로 추가
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        echo "$HOME/.venv/bin" >> $GITHUB_PATH
+
+    - name: Install Dependencies
+      run: uv sync
+
+    - name: Run Ruff (Linting & Formatting Check)
+      run: uv run ruff check .
+
+    - name: Run Django Migration & Tests
+      env:
+        # Secrets에서 DB 접속 정보를 가져와 환경 변수로 설정
+        DATABASE_URL: postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}
+      run: |
+        # 1. 마이그레이션 실행
+        uv run python manage.py migrate --no-input
+        # 2. 테스트 실행
+        uv run python manage.py test
