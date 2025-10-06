@@ -1,0 +1,60 @@
+# pyproject.toml
+
+[project]
+name = "account-book"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12.2"
+# ---------------------------------------------
+# [수정] 코어 의존성 (default)을 [project].dependencies에 명시합니다.
+dependencies = [
+    "django==5.2.7",
+    "djangorestframework",       # DRF
+    "pre-commit",
+    "autoflake",
+    "black",
+    "psycopg2-binary",           # DB 커넥터
+    "django-environ",            # .env 관리를 위해 코어에 포함
+]
+
+# ---------------------------------------------
+# [수정] 개발 및 배포 의존성을 optional-dependencies로 명시합니다.
+[project.optional-dependencies]
+# 개발 의존성 그룹 (Mission에서 요구된 'dev' 그룹)
+dev = [
+    "ruff",                     # 린터/포매터
+    "pytest",
+]
+
+# 배포 의존성 그룹 (Mission에서 요구된 'prod' 그룹)
+prod = [
+    "gunicorn",                 # Gunicorn
+]
+
+# ---------------------------------------------
+# [tool.uv] 설정은 그대로 유지
+[tool.uv]
+# (여기에 기타 uv 설정이 들어갈 수 있지만 지금은 생략)
+# group 정의는 [project.optional-dependencies]가 대체합니다.
+
+
+# ---------------------------------------------
+# [추가] ruff 설정 (Mission 2단계 목표)
+[tool.ruff]
+select = ["E", "F", "I"]
+ignore = []
+line-length = 88
+exclude = [
+    ".venv",
+    "migrations",
+    "docs",
+    "scripts",
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff.isort]
+known-first-party = ["config", "apps"]
+known-local-folder = ["tests"]

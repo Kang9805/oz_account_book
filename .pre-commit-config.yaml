@@ -1,0 +1,31 @@
+# .pre-commit-config.yaml
+repos:
+  # Ruff (린팅 및 포맷팅을 모두 처리하는 고성능 도구)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.0 # 최신 버전 확인 후 반영
+    hooks:
+      # 1. 포맷팅 (Black 대용)
+      - id: ruff-format
+        name: Ruff (Format)
+        args: ["--preview"]
+      # 2. 린팅 및 코드 품질 검사 (Flake8, isort, Black Check 대용)
+      - id: ruff
+        name: Ruff (Lint & Check)
+        args: ["--fix", "--exit-zero"] # `--exit-zero`는 오류가 있어도 커밋을 막지 않음.
+
+  # 안전을 위해 코드가 변경되면 git에 추가되도록 합니다.
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
+      - id: detect-private-key
+      - id: mixed-line-ending
+      # ruff가 수정하는 경우, 이 도구가 수정된 파일을 자동으로 staging area에 추가합니다.
+      - id: no-commit-to-branch
+        args: [--branch, main, --branch, master]
+      - id: fix-encoding-pragma
+      - id: check-merge-conflict
