@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
-import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,6 +39,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "users",
+    "accounts",
 ]
 
 MIDDLEWARE = [
@@ -81,7 +82,7 @@ DATABASES = {
         "NAME": os.environ.get("POSTGRES_DB"),  # 👈 환경 변수 사용
         "USER": os.environ.get("POSTGRES_USER"),  # 👈 환경 변수 사용
         "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),  # 👈 환경 변수 사용
-        "HOST": "postgres",  # 👈 docker-compose.dev.yml에 정의된 DB 서비스 이름
+        "HOST": "db",  # 👈 docker-compose.dev.yml에 정의된 DB 서비스 이름
         "PORT": "5432",  # 👈 PostgreSQL 기본 포트
     }
 }
@@ -104,6 +105,8 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+# 커스텀 User 모델 설정
+AUTH_USER_MODEL = "users.User"
 
 
 # Internationalization
