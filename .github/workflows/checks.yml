@@ -35,22 +35,25 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-        cache: 'pip' # uv 대신 기본 pip 캐시를 사용하도록 설정 (권장)
+        cache: 'pip'
 
-    # ✅ uv run 명령을 사용하지 않기 때문에 이 단계는 제거되었습니다.
+    # 1. uv 설치
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH # uv 실행 파일만 PATH에 추가
 
+    # 2. uv를 사용해 의존성 설치 (ruff 포함)
     - name: Install Dependencies
-      # ✅ GitHub Actions 환경의 pip를 사용하여 의존성 설치
-      run: pip install -r requirements.txt
+      run: uv sync
 
+    # 3. ruff 실행은 python -m 사용 (No module named ruff 오류 해결)
     - name: Run Ruff (Linting & Formatting Check)
-      # ✅ 'uv run' 대신 'python -m'을 사용하여 ruff 모듈 실행
       run: python -m ruff check .
 
     - name: Run Django Migration & Tests
       env:
         DATABASE_URL: postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}
       run: |
-        # ✅ 'uv run' 대신 기본 Python 실행
         python manage.py migrate --no-input
         python manage.py test
