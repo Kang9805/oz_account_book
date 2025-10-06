@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
+      # 서비스 이름은 'postgres'입니다.
       postgres:
         image: postgres:15-alpine
         env:
@@ -20,6 +21,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
           POSTGRES_DB: ${{ secrets.DB_NAME }}
         ports:
+          # 포트 매핑은 유지
           - 5432:5432
         options: >-
           --health-cmd pg_isready
@@ -51,8 +53,8 @@ jobs:
     # 3. Django 마이그레이션 및 테스트 실행
     - name: Run Django Migration & Tests
       env:
-        # ✅ 호스트 이름을 localhost로 수정했습니다!
-        DATABASE_URL: postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}
+        # ✅ 호스트 이름을 서비스 이름 'postgres'로 수정했습니다.
+        DATABASE_URL: postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@postgres:5432/${{ secrets.DB_NAME }}
       run: |
         python manage.py migrate --no-input
         python manage.py test
