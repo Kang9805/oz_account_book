@@ -21,3 +21,4 @@ pytokens==0.1.10
 pyyaml==6.0.3
 sqlparse==0.5.3
 virtualenv==20.34.0
+dj-database-url
