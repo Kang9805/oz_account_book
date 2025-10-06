@@ -75,16 +75,26 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",  # 👈 엔진 변경
-        "NAME": os.environ.get("POSTGRES_DB"),  # 👈 환경 변수 사용
-        "USER": os.environ.get("POSTGRES_USER"),  # 👈 환경 변수 사용
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),  # 👈 환경 변수 사용
-        "HOST": "postgres",  # 👈 docker-compose.dev.yml에 정의된 DB 서비스 이름
-        "PORT": "5432",  # 👈 PostgreSQL 기본 포트
+if os.environ.get("DATABASE_URL"):
+    # CI 환경: DATABASE_URL을 dj_database_url로 파싱하여 사용
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=os.environ.get("DATABASE_URL"),
+            conn_max_age=600
+        )
     }
-}
+else:
+    # 로컬 환경: 개별 환경 변수와 docker-compose 서비스 이름(db)을 사용
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("POSTGRES_DB"),
+            "USER": os.environ.get("POSTGRES_USER"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+            "HOST": "db",  # 로컬 docker-compose 환경에서는 'db'를 사용
+            "PORT": "5432",
+        }
+    }
 
 
 # Password validation
