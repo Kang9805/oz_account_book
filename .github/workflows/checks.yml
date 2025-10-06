@@ -13,7 +13,6 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      # 서비스 이름은 'postgres'이며, 호스트도 'postgres'를 사용합니다.
       postgres:
         image: postgres:15-alpine
         env:
@@ -26,7 +25,7 @@ jobs:
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5 # DB 준비에 충분한 시간을 줍니다.
+          --health-retries 5 # ✅ 주석 제거 완료!
 
     steps:
     - name: Checkout code
@@ -47,15 +46,10 @@ jobs:
         uv sync 
         echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
-    # ❌ 이전에 YAML 오류를 유발했던 'Debug DB URL' 스텝을 완전히 제거했습니다.
-
-    # 3. Django 마이그레이션 및 테스트 실행
     - name: Run Django Migration & Tests
       env:
-        # 호스트 이름은 'postgres'를 유지
         DATABASE_URL: postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@postgres:5432/${{ secrets.DB_NAME }}
       run: |
-        # ✅ DB 서비스가 완전히 준비될 때까지 10초 대기
         sleep 10
         python manage.py migrate --no-input
         python manage.py test
