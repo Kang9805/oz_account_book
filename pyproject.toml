@@ -10,12 +10,13 @@ requires-python = ">=3.12.2"
 # [수정] 코어 의존성 (default)을 [project].dependencies에 명시합니다.
 dependencies = [
     "django==5.2.7",
-    "djangorestframework",       # DRF
+    "djangorestframework", # DRF
     "pre-commit",
     "autoflake",
     "black",
-    "psycopg2-binary",           # DB 커넥터
-    "django-environ",            # .env 관리를 위해 코어에 포함
+    "psycopg2-binary", # DB 커넥터
+    "django-environ", # .env 관리를 위해 코어에 포함
+    "python-dotenv>=1.1.1",
 ]
 
 # ---------------------------------------------
