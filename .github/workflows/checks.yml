@@ -25,7 +25,7 @@ jobs:
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5 
+          --health-retries 5
 
     steps:
     - name: Checkout code
@@ -43,7 +43,7 @@ jobs:
 
     - name: Install Dependencies and Activate Venv
       run: |
-        uv sync 
+        uv sync
         echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
     - name: Run Django Migration & Tests

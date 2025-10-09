@@ -1,10 +1,49 @@
-# Python-generated files
+# ----------------------
+# Python
+# ----------------------
 __pycache__/
 *.py[oc]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environments
+.venv/
+
+# ----------------------
+# Django
+# ----------------------
+*.sqlite3             # SQLite는 안 쓰지만 혹시 실험용
+media/
+staticfiles/
+*.log
+
+# ----------------------
+# Docker
+# ----------------------
+docker-compose.override.yml
+*.log
+
+# ----------------------
+# Environment / secrets
+# ----------------------
+.env
+.config_secret/
+
+# ----------------------
+# PyCharm
+# ----------------------
+.idea/
+
+# ----------------------
+# VSCode (선택)
+# ----------------------
+.vscode/
+
+# ----------------------
+# Distribution / packaging
+# ----------------------
 build/
 dist/
 wheels/
-*.egg-info
-
-# Virtual environments
-.venv
+*.egg-info/
