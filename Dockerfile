@@ -8,20 +8,22 @@ ENV DJANGO_SETTINGS_MODULE=config.settings.dev
 # 작업 디렉토리 설정
 WORKDIR /app
 
-# 1. uv 설치 (Alpine 기반 이미지에서는 필요)
-# Warning을 무시하기 위해 --no-warn-script-location 추가 가능
+# 1. uv 설치
 RUN pip install uv
 
-# 2. 의존성 정의 파일 복사 (uv.lock은 의존성 설치에 필수)
+# 🚨 [새로운 단계: psql 클라이언트 설치] 🚨
+# apt-get을 업데이트하고, postgresql-client를 설치합니다.
+RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
+
+# 2. 의존성 정의 파일 복사
 COPY ./pyproject.toml .
 COPY ./uv.lock .
 
-# 3. run.sh 스크립트 복사 및 실행 권한 부여 (실행 오류 방지)
+# 3. run.sh 스크립트 복사 및 실행 권한 부여
 COPY ./scripts/run.sh /app/scripts/run.sh
 RUN chmod +x /app/scripts/run.sh
 
-# 4. uv를 사용하여 코어 및 개발 의존성 설치 (ruff, pytest 포함)
-# [최종 반영] --system 플래그 제거, --extra dev 사용
+# 4. uv를 사용하여 코어 및 개발 의존성 설치
 ENV UV_PROJECT_ENVIRONMENT=/usr/local
 RUN uv sync --extra dev
 
@@ -30,5 +32,3 @@ COPY . .
 
 # 포트 노출
 EXPOSE 8000
-
-# CMD/ENTRYPOINT는 docker-compose.dev.yml에서 command 필드로 지정합니다.
