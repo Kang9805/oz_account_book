@@ -11,6 +11,7 @@ requires-python = ">=3.12.2"
 dependencies = [
     "django==5.2.7",
     "djangorestframework", # DRF
+    "rest-framework-simplejwt",
     "pre-commit",
     "autoflake",
     "black",
