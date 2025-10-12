@@ -17,6 +17,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
+    date_joined = models.DateTimeField(auto_now_add=True, verbose_name="가입일")
+
     objects = UserManager()  # 커스텀 매니저 연결
 
     USERNAME_FIELD = "email"  # 이메일을 로그인 ID로 사용
