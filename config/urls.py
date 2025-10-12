@@ -18,9 +18,18 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path
+from rest_framework_simplejwt.views import (
+    TokenRefreshView,  # 👈 TokenRefreshView 임포트 추가
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/users/", include("users.urls")),
+    # users 앱의 URL (네임스페이스 포함)
+    # 참고: users.urls에서 name='token_obtain_pair'를 사용하므로,
+    # login URL은 /api/users/token/ 이 될 것입니다.
+    path("api/users/", include("users.urls", namespace="users")),
     path("api/accounts/", include("accounts.urls")),
+    # 🌟 누락된 JWT Refresh URL 추가
+    # 테스트 코드(reverse("token_refresh"))가 참조하는 이름입니다.
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]
