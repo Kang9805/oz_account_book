@@ -17,6 +17,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    environment:
+      - LANG=C.UTF-8
+      - LC_ALL=C.UTF-8
     command: sh /app/scripts/run.sh
 
   # 🐘 PostgreSQL DB 서비스
