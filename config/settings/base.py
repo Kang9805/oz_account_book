@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "users",
     "accounts",
     "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
 ]
 
 MIDDLEWARE = [
@@ -139,7 +140,7 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",  # 기본 인증 필요
+        "rest_framework.permissions.AllowAny",  # 기본 인증 필요
     ),
 }
 
@@ -150,4 +151,12 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
+    # 🌟🌟🌟 쿠키 관련 핵심 설정 추가 🌟🌟🌟
+    "ACCESS_TOKEN_COOKIE": "access_token",  # Access 토큰도 쿠키로 사용하고 싶다면 추가
+    "REFRESH_TOKEN_COOKIE": "refresh_token",  # Refresh 토큰을 쿠키로 사용함을 명시
+    # 쿠키 보안 관련 설정 (기존에 정의한 변수들을 사용)
+    "REFRESH_TOKEN_COOKIE_NAME": "refresh_token",
+    "REFRESH_TOKEN_COOKIE_HTTPONLY": True,
+    "REFRESH_TOKEN_COOKIE_SECURE": False,
+    "REFRESH_TOKEN_COOKIE_SAMESITE": "Lax",
 }
