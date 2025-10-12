@@ -1,23 +1,32 @@
 # -*- coding: utf-8 -*-
+# accounts/views.py (개선된 버전)
+
 from rest_framework import generics, permissions
 
 from accounts.models import Account, Transaction
 from accounts.serializers import AccountSerializer, TransactionSerializer
 
+# 🌟 커스텀 권한 클래스를 임포트해야 합니다.
+from .permissions import IsOwnerOrReadOnly
+
 
 class AuthenticatedAPIView:
-    """로그인 필수 View 공통 부모"""
-
     permission_classes = [permissions.IsAuthenticated]
 
 
-class AccountListCreateView(AuthenticatedAPIView, generics.ListCreateAPIView):
-    """내 계좌 목록 조회 + 계좌 생성"""
+# ----------------------------------------------------------------------
+# 1. Account Views
+# ----------------------------------------------------------------------
 
+
+class AccountListCreateView(AuthenticatedAPIView, generics.ListCreateAPIView):
+    # (이전 코드와 동일: 목록 조회 및 생성)
     serializer_class = AccountSerializer
 
     def get_queryset(self):
-        return Account.objects.filter(user=self.request.user, is_deleted=False)
+        return Account.objects.filter(
+            user=self.request.user, is_deleted=False
+        ).order_by("-created_at")
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -26,45 +35,45 @@ class AccountListCreateView(AuthenticatedAPIView, generics.ListCreateAPIView):
 class AccountRetrieveUpdateDestroyView(
     AuthenticatedAPIView, generics.RetrieveUpdateDestroyAPIView
 ):
-    """계좌 상세 조회 / 수정 / 삭제"""
-
     serializer_class = AccountSerializer
+    # 🌟 2. 객체 레벨 권한 추가
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
     def get_queryset(self):
         return Account.objects.filter(user=self.request.user, is_deleted=False)
 
+    # 🌟 3. Soft Delete 로직 구현
+    def perform_destroy(self, instance):
+        """실제 삭제 대신 is_deleted 플래그를 True로 변경 (Soft Delete)"""
+        instance.is_deleted = True
+        instance.save()
+
+
+# ----------------------------------------------------------------------
+# 2. Transaction Views
+# ----------------------------------------------------------------------
+
 
 class TransactionListCreateView(AuthenticatedAPIView, generics.ListCreateAPIView):
-    """거래 내역 조회 및 생성 (입/출금)"""
-
     serializer_class = TransactionSerializer
 
     def get_queryset(self):
-        return Transaction.objects.filter(account__user=self.request.user)
+        return Transaction.objects.filter(account__user=self.request.user).order_by(
+            "-transaction_timestamp"
+        )
 
     def perform_create(self, serializer):
-        account = serializer.validated_data["account"]
-        amount = serializer.validated_data["transaction_amount"]
-        tx_type = serializer.validated_data["transaction_type"]
-
-        # 입금이면 +, 출금이면 -
-        if tx_type == "DEPOSIT":
-            post_amount = account.balance + amount
-        else:
-            post_amount = account.balance - amount
-
-        # 거래 내역 저장 + 계좌 잔액 갱신
-        serializer.save(post_transaction_amount=post_amount)
-        account.balance = post_amount
-        account.save()
+        # 🌟 1. 잔액 업데이트 로직을 Serializer로 완전히 위임
+        # Serializer의 create() 메서드가 Atomic Transaction을 처리합니다.
+        serializer.save()
 
 
 class TransactionRetrieveUpdateDestroyView(
     AuthenticatedAPIView, generics.RetrieveUpdateDestroyAPIView
 ):
-    """거래 건당 조회/수정/삭제"""
-
     serializer_class = TransactionSerializer
+    # 🌟 2. 객체 레벨 권한 추가
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
     def get_queryset(self):
         return Transaction.objects.filter(account__user=self.request.user)
